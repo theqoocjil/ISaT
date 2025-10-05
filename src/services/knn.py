@@ -3,6 +3,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 
+
 class KnnService():
     """
     Args:
@@ -31,7 +32,10 @@ class KnnService():
         """
         X_train = self._df.drop(self._feature, axis=1)
         X_train_scaled = self._scaler.fit_transform(X_train)
-        param_grid = {'n_neighbors': n_range}
+        param_grid = {
+            'n_neighbors': n_range,
+            'metric': ["euclidean", "manhattan", "cosine", "chebyshev"],
+        }
         grid_search = GridSearchCV(
             self._knn, param_grid, cv=5, scoring='accuracy', n_jobs=-1
         )
@@ -50,7 +54,6 @@ class KnnService():
             raise ValueError("Model must be trained before making predictions")
         
         # Добавить проверку сходимости фреймов
-        
         if self._feature in df.columns:
             X_test = df.drop(self._feature, axis=1)
         else:

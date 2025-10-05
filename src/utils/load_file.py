@@ -7,6 +7,6 @@ def load_file(file_path: str) -> pd.DataFrame:
     Args:
         file_path: The path to the dataset file
     """
-    df = pd.read_csv(filepath_or_buffer=file_path)
+    df = pd.read_csv(filepath_or_buffer=file_path, sep=",")
 
     return df
