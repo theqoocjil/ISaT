@@ -1,4 +1,6 @@
 import pandas as pd
+
+from typing import List
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
@@ -12,7 +14,7 @@ class KnnService():
     """
     
     def __init__(self, df: pd.DataFrame, feature: str):
-        self._df = df
+        self._df = df.reindex(sorted(df.columns), axis=1)
         self._knn = KNeighborsClassifier()
         if feature in self._df.columns:
             self._feature = feature
@@ -25,7 +27,7 @@ class KnnService():
         self._best_score = None
         self._is_trained = False
 
-    def model_training(self, n_range: range):
+    def model_training(self, n_range: range) -> None:
         """
         Args:
             n_range: The range of the number of neighbors
@@ -45,7 +47,7 @@ class KnnService():
         self._best_score = grid_search.best_score_
         self._is_trained = True
 
-    def predict_data(self, df: pd.DataFrame):
+    def predict_data(self, df: pd.DataFrame) -> List:
         """
         Args:
             df: DataFrame for testing
@@ -53,12 +55,16 @@ class KnnService():
         if not self._is_trained:
             raise ValueError("Model must be trained before making predictions")
         
-        # Добавить проверку сходимости фреймов
         if self._feature in df.columns:
-            X_test = df.drop(self._feature, axis=1)
-        else:
-            X_test = df
-        X_test_scaled = self._scaler.transform(X_test)
+            df = df.drop(self._feature, axis=1)
+        
+        df = df.reindex(sorted(df.columns), axis=1)
+        org_df = self._df.drop(self._feature, axis=1)
+
+        if not org_df.columns.equals(df.columns):
+            raise ValueError("DataFrame must have the same attributes")
+
+        X_test_scaled = self._scaler.transform(df)
         predictions = self._best_model.predict(X_test_scaled)
         
         return predictions
