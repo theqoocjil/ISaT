@@ -16,15 +16,17 @@ class KnnService():
     def __init__(self, df: pd.DataFrame, feature: str):
         self._df = df.reindex(sorted(df.columns), axis=1)
         self._knn = KNeighborsClassifier()
+
         if feature in self._df.columns:
             self._feature = feature
             self._y_train = df[feature]
         else:
             raise ValueError("Missing features in input data")
-        self._scaler = StandardScaler()
+
+        self.best_params = None
+        self.best_score = None
         self._best_model = None
-        self._best_params = None
-        self._best_score = None
+        self._scaler = StandardScaler()
         self._is_trained = False
 
     def model_training(self, n_range: range) -> None:
@@ -43,8 +45,8 @@ class KnnService():
         )
         grid_search.fit(X_train_scaled, self._y_train)
         self._best_model = grid_search.best_estimator_
-        self._best_params = grid_search.best_params_
-        self._best_score = grid_search.best_score_
+        self.best_params = grid_search.best_params_
+        self.best_score = grid_search.best_score_
         self._is_trained = True
 
     def predict_data(self, df: pd.DataFrame) -> List:
